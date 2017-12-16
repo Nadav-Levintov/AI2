@@ -54,11 +54,11 @@ class Player(abstract.AbstractPlayer):
 
     def utility(self, state):
         mobility_adv = self.mobility_adv(state)
-        if mobility_adv == INFINITY or mobility_adv == -INFINITY:
+        if mobility_adv > 100 or mobility_adv < -100:
             return mobility_adv
 
         coin_adv = self.coin_adv(state)
-        if coin_adv == INFINITY or coin_adv == -INFINITY:
+        if coin_adv > 100 or coin_adv < -100:
             return coin_adv
 
         corner_adv = self.corner_adv(state)
