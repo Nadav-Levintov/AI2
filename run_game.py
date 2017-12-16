@@ -140,10 +140,10 @@ class GameRunner:
 
 
 if __name__ == '__main__':
-    try:
-        GameRunner(*sys.argv[1:]).run()
-    except TypeError:
-        print("""Syntax: {0} setup_time time_per_k_turns k verbose x_player o_player
-For example: {0} 2 10 5 y interactive random_player
-Please read the docs in the code for more info.""".
-              format(sys.argv[0]))
+#    try:
+     GameRunner(*sys.argv[1:]).run()
+#    except TypeError:
+#        print("""Syntax: {0} setup_time time_per_k_turns k verbose x_player o_player
+#For example: {0} 2 10 5 y interactive random_player
+#Please read the docs in the code for more info.""".
+#              format(sys.argv[0]))

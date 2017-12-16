@@ -89,7 +89,34 @@ class MiniMaxAlgorithm:
         :param maximizing_player: Whether this is a max node (True) or a min node (False).
         :return: A tuple: (The min max algorithm value, The move in case of max node or None in min mode)
         """
-        return self.utility(state), None
+
+        if (0 == len(state.get_possible_moves())) or (0 == depth) or (self.no_more_time()):
+                return self.utility(state), None
+
+        children = state.get_possible_moves()
+
+        turn = state.curr_player
+        best_move = None
+
+        if turn == self.my_color:
+            curr_max = -INFINITY
+            for c in children:
+                c_state = copy.deepcopy(state)
+                c_state.perform_move(c[0], c[1])
+                c_val, _ = self.search(c_state, depth - 1, not maximizing_player)
+                if c_val > curr_max:
+                    curr_max = c_val
+                    best_move = c
+            return curr_max, best_move
+        else:
+            curr_min = INFINITY
+            for c in children:
+                c_state = copy.deepcopy(state)
+                c_state.perform_move(c[0], c[1])
+                c_val, _ = self.search(c_state, depth - 1, not maximizing_player)
+                if c_val < curr_min:
+                    curr_min = c_val
+            return curr_min, None
 
 
 class MiniMaxWithAlphaBetaPruning:
