@@ -69,8 +69,8 @@ class Player(abstract.AbstractPlayer):
         corner_adv = self.corner_adv(state)
         corner_closeness_adv = self.corner_closeness_adv(state)
 
-        weight_total_adv = (0.05 * coin_adv) + (0.6 * corner_adv) + (0.25 * corner_closeness_adv) + (
-                0.10 * mobility_adv)
+        weight_total_adv = (0.50 * coin_adv) + (0.30 * corner_adv) + (0.15 * corner_closeness_adv) + (
+               0.05 * mobility_adv)
 
         return weight_total_adv
 
