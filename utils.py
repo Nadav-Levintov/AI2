@@ -91,10 +91,10 @@ class MiniMaxAlgorithm:
         :return: A tuple: (The min max algorithm value, The move in case of max node or None in min mode)
         """
 
-        if (0 == len(state.get_possible_moves())) or (0 == depth) or (self.no_more_time()):
-                return self.utility(state), None
-
         children = state.get_possible_moves()
+
+        if (0 == len(children)) or (0 == depth) or (self.no_more_time()):
+            return self.utility(state), None
 
         turn = state.curr_player
         best_move = None
