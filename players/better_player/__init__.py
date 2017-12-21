@@ -3,6 +3,7 @@
 # ===============================================================================
 
 import abstract
+from Reversi.board import GameState
 from opening_book import OpeningBook
 from utils import INFINITY, run_with_limited_time, ExceededTimeError
 from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
@@ -26,7 +27,8 @@ class Player(abstract.AbstractPlayer):
         self.time_remaining_in_round = self.time_per_k_turns
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
         self.book = OpeningBook()
-        print(self.book)
+        self.prev_state = GameState()
+        self.moves_list = ""
 
     def get_move(self, game_state, possible_moves):
         self.clock = time.time()
@@ -34,17 +36,21 @@ class Player(abstract.AbstractPlayer):
         if len(possible_moves) == 1:
             return possible_moves[0]
 
-        best_move = possible_moves[0]
-        next_state = copy.deepcopy(game_state)
-        next_state.perform_move(best_move[0], best_move[1])
-        # Choosing an arbitrary move
-        # Get the best move according the utility function
-        for move in possible_moves:
-            new_state = copy.deepcopy(game_state)
-            new_state.perform_move(move[0], move[1])
-            if self.utility(new_state) > self.utility(next_state):
-                next_state = new_state
-                best_move = move
+        best_move = self.opening_move(game_state)
+        print (best_move)
+
+        if best_move == None:
+            best_move = possible_moves[0]
+            next_state = copy.deepcopy(game_state)
+            next_state.perform_move(best_move[0], best_move[1])
+            # Choosing an arbitrary move
+            # Get the best move according the utility function
+            for move in possible_moves:
+                new_state = copy.deepcopy(game_state)
+                new_state.perform_move(move[0], move[1])
+                if self.utility(new_state) > self.utility(next_state):
+                    next_state = new_state
+                    best_move = move
 
         if self.turns_remaining_in_round == 1:
             self.turns_remaining_in_round = self.k
@@ -67,8 +73,6 @@ class Player(abstract.AbstractPlayer):
         corner_adv = self.corner_adv(state)
         corner_closeness_adv = self.corner_closeness_adv(state)
 
-        #weight_total_adv = (0.05 * coin_adv) + (0.6 * corner_adv) + (0.25 * corner_closeness_adv) + (
-         #       0.10 * mobility_adv)
         #TODO: fix Word file
         weight_total_adv = (0.50 * coin_adv) + (0.30 * corner_adv) + (0.15 * corner_closeness_adv) + (
                0.05 * mobility_adv)
@@ -232,5 +236,49 @@ class Player(abstract.AbstractPlayer):
 
     def __repr__(self):
         return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'better')
+
+    def opening_move(self,state):
+        if len(self.moves_list) >= 30:
+            return None
+
+        print(self.moves_list)
+
+        if self.prev_state.board == state.board and self.moves_list in self.book.dic.keys():
+            book_move = self.book.dic[self.moves_list]
+            self.moves_list = self.moves_list+book_move
+            reg_move = self.book_move_to_reg_move(book_move)
+            self.prev_state.perform_move(reg_move[0],reg_move[1])
+            return reg_move
+
+        opp_move=self.find_opp_move(state)
+        print (opp_move)
+        print (self.book_move_to_reg_move("-"+opp_move))
+        self.moves_list = self.moves_list + "-" +  opp_move
+        print(self.moves_list)
+        self.prev_state = copy.deepcopy(state)
+        if self.moves_list in self.book.dic.keys():
+            book_move = self.book.dic[self.moves_list]
+            self.moves_list = self.moves_list + book_move
+            reg_move = self.book_move_to_reg_move(book_move)
+            self.prev_state.perform_move(reg_move[0], reg_move[1])
+            return reg_move
+
+        return None
+
+    def book_move_to_reg_move(self,book_move):
+        #parse input from the book to our input
+        return [(ord(book_move[1:2])-97)-1,int(book_move[2:3])+1]
+
+    def reg_move_to_book_move(self,reg_move):
+        #parse input from the book to our input
+        book_mov =  chr(reg_move[0]+97+1)
+        book_mov = book_mov + chr(reg_move[1]-1+48)
+        return book_mov
+
+    def find_opp_move(self, state):
+        for x in range(BOARD_COLS):
+            for y in range(BOARD_ROWS):
+                if(self.prev_state.board[x][y] == EM and state.board[x][y] != EM and state.board[x][y]):
+                    return self.reg_move_to_book_move([x,y])
 
 # c:\python35\python.exe run_game.py 3 3 3 y simple_player random_player
