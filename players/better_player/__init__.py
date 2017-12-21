@@ -3,6 +3,7 @@
 # ===============================================================================
 
 import abstract
+from opening_book import OpeningBook
 from utils import INFINITY, run_with_limited_time, ExceededTimeError
 from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
@@ -24,6 +25,8 @@ class Player(abstract.AbstractPlayer):
         self.turns_remaining_in_round = self.k
         self.time_remaining_in_round = self.time_per_k_turns
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
+        self.book = OpeningBook()
+        print(self.book)
 
     def get_move(self, game_state, possible_moves):
         self.clock = time.time()

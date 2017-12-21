@@ -45,15 +45,12 @@ class Player(abstract.AbstractPlayer):
                 best_util = curr_best_util
             i+=1
 
-        # Not sure if we need these lines,compied them from simple_player, code works with / without them - does not
-        # understand their propose
-        # TODO: check if needed or not
-        #if self.turns_remaining_in_round == 1:
-        #   self.turns_remaining_in_round = self.k
-        #    self.time_remaining_in_round = self.time_per_k_turns
-        #else:
-        #    self.turns_remaining_in_round -= 1
-        #    self.time_remaining_in_round -= (time.time() - self.clock)
+        if self.turns_remaining_in_round == 1:
+           self.turns_remaining_in_round = self.k
+           self.time_remaining_in_round = self.time_per_k_turns
+        else:
+            self.turns_remaining_in_round -= 1
+            self.time_remaining_in_round -= (time.time() - self.clock)
 
         return best_move
 
