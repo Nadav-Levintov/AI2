@@ -76,7 +76,6 @@ class Player(abstract.AbstractPlayer):
         corner_adv = self.corner_adv(state)
         corner_closeness_adv = self.corner_closeness_adv(state)
 
-        # TODO: fix Word file
         weight_total_adv = (0.50 * coin_adv) + (0.30 * corner_adv) + (0.15 * corner_closeness_adv) + (
                 0.05 * mobility_adv)
 
