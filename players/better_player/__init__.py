@@ -29,6 +29,8 @@ class Player(abstract.AbstractPlayer):
         self.book = OpeningBook()
         self.prev_state = GameState()
         self.moves_list = ""
+        self.book_to_our_dic = self.build_book_to_our_dic()
+        self.our_to_book_dic = self.build_our_to_book_dic()
 
     def get_move(self, game_state, possible_moves):
         self.clock = time.time()
@@ -37,7 +39,6 @@ class Player(abstract.AbstractPlayer):
             return possible_moves[0]
 
         best_move = self.opening_move(game_state)
-        print (best_move)
 
         if best_move == None:
             best_move = possible_moves[0]
@@ -51,6 +52,8 @@ class Player(abstract.AbstractPlayer):
                 if self.utility(new_state) > self.utility(next_state):
                     next_state = new_state
                     best_move = move
+            self.moves_list = self.moves_list+"+"+self.our_to_book_dic[best_move[0]][best_move[1]]
+            self.prev_state=next_state
 
         if self.turns_remaining_in_round == 1:
             self.turns_remaining_in_round = self.k
@@ -73,9 +76,9 @@ class Player(abstract.AbstractPlayer):
         corner_adv = self.corner_adv(state)
         corner_closeness_adv = self.corner_closeness_adv(state)
 
-        #TODO: fix Word file
+        # TODO: fix Word file
         weight_total_adv = (0.50 * coin_adv) + (0.30 * corner_adv) + (0.15 * corner_closeness_adv) + (
-               0.05 * mobility_adv)
+                0.05 * mobility_adv)
 
         return weight_total_adv
 
@@ -237,48 +240,58 @@ class Player(abstract.AbstractPlayer):
     def __repr__(self):
         return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'better')
 
-    def opening_move(self,state):
+    def opening_move(self, state):
         if len(self.moves_list) >= 30:
             return None
 
-        print(self.moves_list)
-
-        if self.prev_state.board == state.board and self.moves_list in self.book.dic.keys():
+        if self.prev_state.board == state.board:
             book_move = self.book.dic[self.moves_list]
-            self.moves_list = self.moves_list+book_move
-            reg_move = self.book_move_to_reg_move(book_move)
-            self.prev_state.perform_move(reg_move[0],reg_move[1])
+            self.moves_list = self.moves_list + book_move
+            reg_move = self.book_to_our_dic[book_move[1:3]]
+            self.prev_state.perform_move(reg_move[0], reg_move[1])
             return reg_move
 
-        opp_move=self.find_opp_move(state)
-        print (opp_move)
-        print (self.book_move_to_reg_move("-"+opp_move))
-        self.moves_list = self.moves_list + "-" +  opp_move
-        print(self.moves_list)
+        opp_move = self.find_opp_move(state)
+        if len(self.moves_list) % 2 == 0:
+            opp_move = "+" + opp_move
+        else:
+            opp_move = "-" + opp_move
+        self.moves_list = self.moves_list + opp_move
         self.prev_state = copy.deepcopy(state)
         if self.moves_list in self.book.dic.keys():
             book_move = self.book.dic[self.moves_list]
             self.moves_list = self.moves_list + book_move
-            reg_move = self.book_move_to_reg_move(book_move)
+            reg_move = self.book_to_our_dic[book_move[1:3]]
             self.prev_state.perform_move(reg_move[0], reg_move[1])
             return reg_move
 
         return None
 
-    def book_move_to_reg_move(self,book_move):
-        #parse input from the book to our input
-        return [(ord(book_move[1:2])-97)-1,int(book_move[2:3])+1]
 
-    def reg_move_to_book_move(self,reg_move):
-        #parse input from the book to our input
-        book_mov =  chr(reg_move[0]+97+1)
-        book_mov = book_mov + chr(reg_move[1]-1+48)
-        return book_mov
+    def build_our_to_book_dic(self):
+        dic ={}
+        for x in range(BOARD_COLS):
+            dic[x]={}
+            for y in range(BOARD_ROWS):
+                key = [x,y]
+                val = chr(ord('h')-7+y)+chr(ord('8')-x)
+                dic[x][y]=val
+        return dic
+
+    def build_book_to_our_dic(self):
+        dic ={}
+        for x in range(BOARD_COLS):
+            for y in range(BOARD_ROWS):
+                key = chr(ord('a')+x)+chr(ord('1')+y)
+                val = [7-y,x]
+                dic[key]=val
+        return dic
+
 
     def find_opp_move(self, state):
         for x in range(BOARD_COLS):
             for y in range(BOARD_ROWS):
-                if(self.prev_state.board[x][y] == EM and state.board[x][y] != EM and state.board[x][y]):
-                    return self.reg_move_to_book_move([x,y])
+                if (self.prev_state.board[x][y] == EM and state.board[x][y] != EM and state.board[x][y]):
+                    return self.our_to_book_dic[x][y]
 
 # c:\python35\python.exe run_game.py 3 3 3 y simple_player random_player
