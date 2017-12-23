@@ -3,10 +3,11 @@
 # ===============================================================================
 
 import abstract
-from utils import INFINITY, run_with_limited_time, ExceededTimeError, MiniMaxAlgorithm
+from utils import INFINITY, run_with_limited_time, ExceededTimeError, MiniMaxWithAlphaBetaPruning
 from Reversi.consts import EM, OPPONENT_COLOR, BOARD_COLS, BOARD_ROWS
 import time
 import copy
+
 from collections import defaultdict
 
 
@@ -25,28 +26,47 @@ class Player(abstract.AbstractPlayer):
         self.time_remaining_in_round = self.time_per_k_turns
         self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
 
+
+        self.k = k
+        self.time = time_per_k_turns
+        self.move_counter = 0
+
     def get_move(self, game_state, possible_moves):
         self.clock = time.time()
-        self.time_for_current_move = self.time_remaining_in_round / self.turns_remaining_in_round - 0.05
+        if(self.move_counter % self.k == 0  ):
+            self.time_for_current_move = 1.2 * self.time / self.k - 0.05
+            self.move_counter+=1
+        else:
+            self.time_for_current_move = (self.k - 1.2)/(self.k-1) * self.time / self.k - 0.05
+            self.move_counter += 1
         if len(possible_moves) == 1:
-            print("min max : only one choice")
             return possible_moves[0]
-
+        print("time for move" , self.time_for_current_move)
         best_move = possible_moves[0]
         next_state = copy.deepcopy(game_state)
         next_state.perform_move(best_move[0], best_move[1])
         best_util = self.utility(next_state)
 
-        min_max = MiniMaxAlgorithm(self.utility,self.color,self.no_more_time,self.selective_deepening_criterion)
+        min_max = MiniMaxWithAlphaBetaPruning(self.utility,self.color,self.no_more_time,self.selective_deepening_criterion)
+
         i=1
+        alpha = -INFINITY
+        max = -INFINITY
+        # print("search time is ", self.time_for_current_move)
+        # start_time = time.time()
         depth = 0
         while not self.no_more_time():
-            curr_best_util, curr_best_move = min_max.search(game_state,i,True)
+            # print("clock ", time.time() - start_time)
+            curr_best_util, curr_best_move = min_max.search(game_state,i,alpha,INFINITY,True)
             depth+=1
             if curr_best_util > best_util:
                 best_move = curr_best_move
                 best_util = curr_best_util
+            if curr_best_util > max :
+                alpha =  curr_best_util
+                max = curr_best_util
             i+=1
+        # print("clock ", time.time() - start_time)
 
         # Not sure if we need these lines,compied them from simple_player, code works with / without them - does not
         # understand their propose
@@ -57,7 +77,7 @@ class Player(abstract.AbstractPlayer):
         #else:
         #    self.turns_remaining_in_round -= 1
         #    self.time_remaining_in_round -= (time.time() - self.clock)
-        print("min_max depth : " , depth)
+        print("alpha_beta depth : ",depth)
         return best_move
 
     def utility(self, state):
@@ -226,13 +246,13 @@ class Player(abstract.AbstractPlayer):
         return mobility
 
     def selective_deepening_criterion(self, state):
-        # min_max player does not selectively deepen into certain nodes.
+        # alpha_beta player does not selectively deepen into certain nodes.
         return False
 
     def no_more_time(self):
         return (time.time() - self.clock) >= self.time_for_current_move
 
     def __repr__(self):
-        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'min_max')
+        return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'alpha_beta2_player')
 
 # c:\python35\python.exe run_game.py 3 3 3 y simple_player random_player
