@@ -58,15 +58,13 @@ class Player(abstract.AbstractPlayer):
             i+=1
         # print("clock ", time.time() - start_time)
 
-        # Not sure if we need these lines,compied them from simple_player, code works with / without them - does not
-        # understand their propose
-        # TODO: check if needed or not
-        #if self.turns_remaining_in_round == 1:
-        #   self.turns_remaining_in_round = self.k
-        #    self.time_remaining_in_round = self.time_per_k_turns
-        #else:
-        #    self.turns_remaining_in_round -= 1
-        #    self.time_remaining_in_round -= (time.time() - self.clock)
+        if self.turns_remaining_in_round == 1:
+            self.turns_remaining_in_round = self.k
+            self.time_remaining_in_round = self.time_per_k_turns
+        else:
+            self.turns_remaining_in_round -= 1
+            self.time_remaining_in_round -= (time.time() - self.clock)
+
         print("alpha_beta depth : ",depth)
         return best_move
 
