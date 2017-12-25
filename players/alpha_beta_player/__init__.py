@@ -65,7 +65,7 @@ class Player(abstract.AbstractPlayer):
             self.turns_remaining_in_round -= 1
             self.time_remaining_in_round -= (time.time() - self.clock)
 
-        print("alpha_beta depth : ",depth)
+        #print("alpha_beta depth : ",depth)
         return best_move
 
     def utility(self, state):

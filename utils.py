@@ -91,9 +91,12 @@ class MiniMaxAlgorithm:
         :return: A tuple: (The min max algorithm value, The move in case of max node or None in min mode)
         """
 
+        if self.no_more_time():
+            return self.utility(state), None
+
         children = state.get_possible_moves()
 
-        if (0 == len(children)) or (0 == depth) or (self.no_more_time()):
+        if (0 == len(children)) or (0 == depth):
             return self.utility(state), None
 
         turn = state.curr_player
@@ -150,7 +153,11 @@ class MiniMaxWithAlphaBetaPruning:
         :param maximizing_player: Whether this is a max node (True) or a min node (False).
         :return: A tuple: (The alpha-beta algorithm value, The move in case of max node or None in min mode)
         """
-        if (0 == len(state.get_possible_moves())) or (0 == depth) or (self.no_more_time()):
+
+        if self.no_more_time():
+            return self.utility(state), None
+
+        if (0 == len(state.get_possible_moves())) or (0 == depth) :
                 return self.utility(state), None
 
         children = state.get_possible_moves()
