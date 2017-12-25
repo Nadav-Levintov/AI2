@@ -51,13 +51,13 @@ class Player(abstract.AbstractPlayer):
         # Not sure if we need these lines,compied them from simple_player, code works with / without them - does not
         # understand their propose
         # TODO: check if needed or not
-        #if self.turns_remaining_in_round == 1:
-        #   self.turns_remaining_in_round = self.k
-        #    self.time_remaining_in_round = self.time_per_k_turns
-        #else:
-        #    self.turns_remaining_in_round -= 1
-        #    self.time_remaining_in_round -= (time.time() - self.clock)
-        print("min_max depth : " , depth)
+        if self.turns_remaining_in_round == 1:
+           self.turns_remaining_in_round = self.k
+           self.time_remaining_in_round = self.time_per_k_turns
+        else:
+            self.turns_remaining_in_round -= 1
+            self.time_remaining_in_round -= (time.time() - self.clock)
+        #print("min_max depth : ", depth)
         return best_move
 
     def utility(self, state):
@@ -231,6 +231,7 @@ class Player(abstract.AbstractPlayer):
 
     def no_more_time(self):
         return (time.time() - self.clock) >= self.time_for_current_move
+
 
     def __repr__(self):
         return '{} {}'.format(abstract.AbstractPlayer.__repr__(self), 'min_max')
